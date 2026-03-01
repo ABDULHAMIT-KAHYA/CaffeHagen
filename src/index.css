@@ -57,6 +57,97 @@
     --font-serif: 'Playfair Display', Georgia, serif;
     --font-sans: 'DM Sans', system-ui, sans-serif;
   }
+
+  /* Winter Theme - Cool & Crisp */
+  .theme-winter {
+    --background: 210 20% 96%;
+    --foreground: 220 20% 20%;
+    --accent: 200 60% 60%; /* Icy Blue */
+    --secondary: 210 15% 90%;
+    --cream: 210 20% 96%;
+    --terracotta: 200 60% 60%;
+  }
+
+  /* Ramadan Theme - Deep & Gold */
+  .theme-ramadan {
+    --background: 40 20% 95%;
+    --foreground: 220 30% 15%; /* Deep Blue */
+    --accent: 45 80% 50%; /* Gold */
+    --secondary: 40 15% 90%;
+    --cream: 40 20% 95%;
+    --terracotta: 45 80% 50%;
+  }
+
+  /* Christmas Theme - Festive Red & Green */
+  .theme-christmas {
+    --background: 0 10% 96%;
+    --foreground: 150 30% 15%; /* Dark Green */
+    --accent: 350 70% 50%; /* Holiday Red */
+    --secondary: 150 10% 90%;
+    --cream: 0 10% 96%;
+    --terracotta: 350 70% 50%;
+  }
+
+  /* Snow Animation */
+  @keyframes snowfall {
+    0% {
+      transform: translate3d(var(--left-start), -10px, 0);
+      opacity: 0;
+    }
+    10% {
+      opacity: var(--opacity);
+    }
+    90% {
+      opacity: var(--opacity);
+    }
+    100% {
+      transform: translate3d(var(--left-end), 110vh, 0);
+      opacity: 0;
+    }
+  }
+
+  .snowflake {
+    position: fixed;
+    top: -10px;
+    z-index: 50;
+    pointer-events: none;
+    background: white;
+    border-radius: 50%;
+    animation: snowfall linear infinite;
+  }
+
+  .theme-winter .snowflake {
+    background: #60a5fa; /* blue-400 */
+    box-shadow: 0 0 4px #93c5fd; /* blue-300 glow */
+  }
+
+  /* Atmosphere Effects */
+  .theme-winter body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0) 0%, rgba(200, 220, 255, 0.1) 100%);
+    z-index: 40; /* Below header z-50 */
+  }
+
+  .theme-ramadan body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image: radial-gradient(circle at 50% 0%, rgba(255, 215, 0, 0.05) 0%, rgba(0, 0, 0, 0) 70%);
+    z-index: 40;
+  }
+
+  .theme-bayram body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image: radial-gradient(circle at 50% 0%, rgba(255, 165, 0, 0.05) 0%, rgba(0, 0, 0, 0) 70%);
+    z-index: 40;
+  }
 }
 
 @layer base {
