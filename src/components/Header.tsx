@@ -28,7 +28,7 @@ const Header = () => {
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        scrolled
+        scrolled || menuOpen
           ? "bg-background/95 backdrop-blur-md shadow-sm py-4"
           : "bg-transparent py-6"
       }`}
@@ -40,12 +40,12 @@ const Header = () => {
             <>
               {/* Left Snowflake */}
               <Snowflake 
-                className="absolute -top-1 -left-8 text-sky-400 animate-pulse drop-shadow-[0_0_8px_rgba(56,189,248,0.8)]" 
+                className="absolute -top-1 -left-6 md:-left-8 text-sky-400 animate-pulse drop-shadow-[0_0_8px_rgba(56,189,248,0.8)]" 
                 size={24} 
               />
               {/* Right Snowflake */}
               <Snowflake 
-                className="absolute -top-1 -right-8 text-sky-400 animate-pulse delay-700 drop-shadow-[0_0_8px_rgba(56,189,248,0.8)]" 
+                className="absolute -top-1 -right-6 md:-right-8 text-sky-400 animate-pulse delay-700 drop-shadow-[0_0_8px_rgba(56,189,248,0.8)]" 
                 size={24} 
               />
             </>
@@ -89,32 +89,32 @@ const Header = () => {
             </div>
           )}
 
-          <span className={scrolled ? "text-foreground" : "text-cream"}>
+          <span className={scrolled || menuOpen ? "text-foreground" : "text-cream"}>
             Caffè Hangen
           </span>
         </a>
 
         <nav className="hidden md:flex items-center gap-10">
-          <ThemeToggle scrolled={scrolled} />
+          <ThemeToggle scrolled={scrolled || menuOpen} />
           {navItems.map((item) => (
             <a
               key={item.href}
               href={item.href}
               className={`text-sm font-medium tracking-widest uppercase transition-colors hover:text-accent ${
-                scrolled ? "text-foreground" : "text-cream"
+                scrolled || menuOpen ? "text-foreground" : "text-cream"
               }`}
             >
               {item.label}
             </a>
           ))}
-          <div className="ml-2 pl-6 border-l border-white/20">
-            <LanguageToggle scrolled={scrolled} />
+          <div className={`ml-2 pl-6 border-l ${scrolled || menuOpen ? "border-foreground/20" : "border-white/20"}`}>
+            <LanguageToggle scrolled={scrolled || menuOpen} />
           </div>
         </nav>
 
         <button
           onClick={() => setMenuOpen(!menuOpen)}
-          className={`md:hidden ${scrolled ? "text-foreground" : "text-cream"}`}
+          className={`md:hidden ${scrolled || menuOpen ? "text-foreground" : "text-cream"}`}
         >
           {menuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
