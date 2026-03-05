@@ -70,7 +70,7 @@ const HeroSection = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: false }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="font-serif text-5xl md:text-7xl lg:text-8xl text-cream font-medium leading-tight mb-6"
+            className="font-serif text-4xl md:text-7xl lg:text-8xl text-cream font-medium leading-tight mb-6"
           >
             {t("hero.title")}
             <br />

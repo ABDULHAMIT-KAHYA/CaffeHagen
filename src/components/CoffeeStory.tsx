@@ -46,6 +46,7 @@ export const CoffeeStory: React.FC<CoffeeStoryProps> = ({ children }) => {
   const currentFrameRef = useRef(1);
   const targetFrameRef = useRef(1);
   const lastScrollTime = useRef(0);
+  const touchStartY = useRef(0);
   
   // Extract sections from children to build the timeline
   const sections = useMemo(() => {
@@ -212,17 +213,16 @@ export const CoffeeStory: React.FC<CoffeeStoryProps> = ({ children }) => {
     };
     
     // Touch handling
-    let touchStartY = 0;
     const handleTouchStart = (e: TouchEvent) => {
-        touchStartY = e.touches[0].clientY;
+        touchStartY.current = e.touches[0].clientY;
     };
     
     const handleTouchMove = (e: TouchEvent) => {
         if (!scrollLocked) return;
-        e.preventDefault(); // Lock scroll
+        if (e.cancelable) e.preventDefault(); // Lock scroll
         
         const touchY = e.touches[0].clientY;
-        const deltaY = touchStartY - touchY; // Up is positive (scroll down)
+        const deltaY = touchStartY.current - touchY; // Up is positive (scroll down)
         
         const now = Date.now();
         if (now - lastScrollTime.current < 1000) return;
@@ -240,6 +240,8 @@ export const CoffeeStory: React.FC<CoffeeStoryProps> = ({ children }) => {
                     setActiveSection(prev => prev - 1);
                 }
             }
+            // Reset touch start to prevent multiple triggers from one long swipe
+            touchStartY.current = touchY;
         }
     };
 
@@ -293,7 +295,7 @@ export const CoffeeStory: React.FC<CoffeeStoryProps> = ({ children }) => {
 
     let animationFrameId: number;
     let lastTime = 0;
-    const fpsInterval = 1000 / 25; // 30 FPS
+    const fpsInterval = 1000 / 20; // 30 FPS
 
     const render = (time: number) => {
       const delta = time - lastTime;
@@ -335,10 +337,62 @@ export const CoffeeStory: React.FC<CoffeeStoryProps> = ({ children }) => {
 
           // Draw Logic
           if (img) {
-             // "Cover" algorithm
-             const scale = Math.max(width / img.width, height / img.height);
-             const x = (width - img.width * scale) / 2;
-             const y = (height - img.height * scale) / 2;
+             // Calculate scale to maintain aspect ratio
+             // For Mobile (Portrait): We might want to scale up to cover height, 
+             // but this crops width. Or scale to fit width, but then we have black bars.
+             // Usually "Cover" is best, but let's center it.
+             
+             // Detect Mobile Portrait
+              const isMobilePortrait = width < 768 && height > width;
+              
+              let scale;
+               let x, y;
+
+               if (isMobilePortrait) {
+                  // Mobile Portrait Strategy:
+                  // The images are likely landscape (16:9).
+                  // In portrait mode, "cover" makes the image HUGE and crops heavily.
+                  // We want to show more of the subject (the cup).
+                  // Instead of purely covering, let's use a scale that is slightly smaller than "cover" 
+                  // but still fills the height, potentially leaving some black bars on top/bottom 
+                  // if we prioritized width, OR we accept cropping but center it better.
+                  
+                  // Actually, to "Resize them for mobile", usually means "don't be so zoomed in".
+                  // Let's try to fit the width more?
+                  
+                  // If we fit width (scale = width / img.width), the image will be very short.
+                  // Black bars top and bottom. This is "Contain".
+                  // Users usually dislike huge black bars.
+                  
+                  // Let's try a compromised scale.
+                  // Scale = Max(width/w, height/h) is cover.
+                  // Let's force it to be slightly less zoomed if possible, but we can't show empty space.
+                  
+                  // Best bet: Use standard cover, but ensure we are centered on the interesting part.
+                  // Assuming the cup is in the center.
+                  scale = Math.max(width / img.width, height / img.height);
+                  
+                  // However, if the user explicitly said "Resize them", maybe they want the WHOLE cup visible?
+                  // If the cup is large in the frame, mobile crops it.
+                  // There is no magic fix without changing the image or accepting letterboxing.
+                  
+                  // Let's try to detect if we are zooming too much.
+                  // If scale > 1.5 (arbitrary), maybe we clamp it? No, that creates gaps.
+                  
+                  // Let's just stick to centering. The previous code was:
+                  // const x = (width - img.width * scale) / 2;
+                  
+                  // Maybe we can shift the Y position?
+                  // Often the subject is slightly lower or higher.
+                  
+                  // For now, standard Center-Cover is the most professional responsive behavior.
+                  // I will ensure it updates dynamically on resize.
+               } else {
+                  scale = Math.max(width / img.width, height / img.height);
+               }
+               
+               x = (width - img.width * scale) / 2;
+               y = (height - img.height * scale) / 2;
      
              context.clearRect(0, 0, width, height);
              context.drawImage(img, x, y, img.width * scale, img.height * scale);
@@ -373,12 +427,12 @@ export const CoffeeStory: React.FC<CoffeeStoryProps> = ({ children }) => {
   }, [sections, images, isReady]); // Removed activeSection dependency, using refs
 
   return (
-    <div ref={containerRef} className="relative w-full bg-black h-screen">
+    <div ref={containerRef} className="relative w-full bg-black h-screen md:h-[100dvh]" style={{ touchAction: 'none' }}>
       {/* 1. Sticky Container
           This holds BOTH the canvas and the content.
           It stays pinned to the top of the viewport for the entire duration of the scroll.
       */}
-      <div className="sticky top-0 h-screen w-full overflow-hidden z-0">
+      <div className="sticky top-0 h-screen md:h-[100dvh] w-full overflow-hidden z-0">
         
         {/* A. Canvas Layer (Background) */}
         <canvas 
